@@ -76,6 +76,99 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Authentication Endpoint for all roles
+app.post('/api/auth/login', (req, res) => {
+  const { role = 'merchant', identifier = '', password = '', otp = '' } = req.body;
+  const idQuery = (identifier || '').trim().toLowerCase();
+
+  let user = null;
+  let entity = null;
+
+  if (role === 'merchant') {
+    entity = db.merchants.find(m => 
+      m.gstin.toLowerCase() === idQuery ||
+      m.licenseNumber.toLowerCase() === idQuery ||
+      m.contactEmail.toLowerCase() === idQuery ||
+      m.id.toLowerCase() === idQuery
+    ) || db.merchants[0];
+
+    user = {
+      id: entity.id,
+      name: entity.ownerName,
+      tradeName: entity.tradeName,
+      identifier: entity.gstin,
+      district: entity.district,
+      state: entity.state,
+      role: 'merchant'
+    };
+  } else if (role === 'inspector') {
+    entity = db.officers.find(o => 
+      o.badgeNumber.toLowerCase() === idQuery ||
+      o.email.toLowerCase() === idQuery ||
+      o.id.toLowerCase() === idQuery
+    ) || db.officers[0];
+
+    user = {
+      id: entity.id,
+      name: entity.name,
+      designation: entity.designation,
+      identifier: entity.badgeNumber,
+      district: entity.jurisdictionDistrict,
+      state: entity.jurisdictionState,
+      role: 'inspector'
+    };
+  } else if (role === 'gatc') {
+    entity = db.gatcCenters.find(g => 
+      g.recognitionNumber.toLowerCase() === idQuery ||
+      g.id.toLowerCase() === idQuery
+    ) || db.gatcCenters[0];
+
+    user = {
+      id: entity.id,
+      name: entity.inCharge,
+      labName: entity.name,
+      identifier: entity.recognitionNumber,
+      city: entity.city,
+      state: entity.state,
+      role: 'gatc'
+    };
+  } else if (role === 'regulator') {
+    user = {
+      id: 'reg-01',
+      name: 'Dr. Suresh Chandra (Directorate Super Admin)',
+      designation: 'Controller General of Legal Metrology',
+      identifier: 'GOI-ADM-001',
+      department: 'Department of Consumer Affairs, New Delhi',
+      role: 'regulator'
+    };
+  } else if (role === 'consumer') {
+    user = {
+      id: 'cit-01',
+      name: 'Citizen Consumer',
+      phone: identifier || '+91 98200 99881',
+      identifier: 'CITIZEN-AUTH',
+      role: 'consumer'
+    };
+  }
+
+  // Audit log the sign-in
+  addAuditLog({
+    actorRole: (role || 'USER').toUpperCase(),
+    actorName: user.name,
+    action: 'SESSION_AUTHENTICATED',
+    target: user.identifier || 'AUTH-NODE',
+    details: `Successfully signed in via ${role} portal gateway.`
+  });
+
+  return res.json({
+    success: true,
+    token: `NLMVS-TOKEN-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+    user,
+    entity,
+    role
+  });
+});
+
 // Jurisdictions & reference data
 app.get('/api/jurisdictions', (req, res) => res.json(db.jurisdictions));
 app.get('/api/officers', (req, res) => res.json(db.officers));

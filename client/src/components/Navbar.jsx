@@ -7,12 +7,25 @@ import {
   Users, 
   Bell, 
   CheckCircle2,
-  ShieldAlert,
-  Search
+  Search,
+  Home,
+  LogIn,
+  LogOut,
+  UserCheck,
+  ShieldCheck
 } from 'lucide-react';
 import { Emblem } from './Emblem';
 
-export function Navbar({ activePortal, setActivePortal, alertsCount = 2, onSearchClick }) {
+export function Navbar({ 
+  activePortal, 
+  setActivePortal, 
+  alertsCount = 2, 
+  onSearchClick,
+  currentUser = null,
+  onLogout,
+  onNavigateLogin,
+  onNavigateHome
+}) {
   const portals = [
     { id: 'merchant', label: 'Merchant Portal', icon: Building2, subtitle: 'Traders & Establishments' },
     { id: 'inspector', label: 'LMO Inspector', icon: Scale, subtitle: 'Field Verification Toolkit' },
@@ -34,8 +47,12 @@ export function Navbar({ activePortal, setActivePortal, alertsCount = 2, onSearc
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
         
         {/* Brand & Govt Identity */}
-        <div className="flex items-center gap-3">
-          <Emblem className="w-11 h-11 flex-shrink-0" />
+        <div 
+          onClick={onNavigateHome}
+          className="flex items-center gap-3 cursor-pointer group"
+          title="Return to e-Maap National Home"
+        >
+          <Emblem className="w-11 h-11 flex-shrink-0 group-hover:scale-105 transition-transform" />
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -57,8 +74,8 @@ export function Navbar({ activePortal, setActivePortal, alertsCount = 2, onSearc
           </div>
         </div>
 
-        {/* Right Action Icons & Badges */}
-        <div className="flex items-center gap-3">
+        {/* Right Action Icons & Auth Badges */}
+        <div className="flex items-center gap-2 sm:gap-3">
           
           <button
             onClick={onSearchClick}
@@ -70,9 +87,9 @@ export function Navbar({ activePortal, setActivePortal, alertsCount = 2, onSearc
           </button>
 
           {/* Connected Live Database Badge */}
-          <div className="hidden lg:flex items-center gap-1 px-2.5 py-1 bg-emerald-50 rounded-full border border-emerald-200 text-[11px] font-medium text-emerald-800">
+          <div className="hidden xl:flex items-center gap-1 px-2.5 py-1 bg-emerald-50 rounded-full border border-emerald-200 text-[11px] font-medium text-emerald-800">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Central Metrology Node: Live</span>
+            <span>Central Node: Live</span>
           </div>
 
           {/* Expiry Alerts Bell */}
@@ -91,13 +108,77 @@ export function Navbar({ activePortal, setActivePortal, alertsCount = 2, onSearc
             </button>
           </div>
 
+          {/* User Profile / Auth State Button */}
+          {currentUser ? (
+            <div className="flex items-center gap-2 pl-1 border-l border-slate-200">
+              <div className="hidden sm:flex flex-col text-right">
+                <span className="text-xs font-bold text-slate-800 truncate max-w-[140px]">
+                  {currentUser.name}
+                </span>
+                <span className="text-[10px] text-emerald-700 font-semibold uppercase tracking-wider">
+                  {currentUser.role === 'merchant' && (currentUser.tradeName || 'Merchant')}
+                  {currentUser.role === 'inspector' && (currentUser.identifier || 'LMO Inspector')}
+                  {currentUser.role === 'gatc' && 'GATC Test Lab'}
+                  {currentUser.role === 'regulator' && 'Super Admin'}
+                  {currentUser.role === 'consumer' && 'Citizen'}
+                </span>
+              </div>
+
+              {currentUser.avatar ? (
+                <img 
+                  src={currentUser.avatar} 
+                  alt={currentUser.name} 
+                  className="w-8 h-8 rounded-full border border-slate-300 object-cover shadow-sm"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                  {currentUser.name ? currentUser.name.charAt(0) : 'U'}
+                </div>
+              )}
+
+              <button
+                onClick={onLogout}
+                className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-300 text-slate-600 hover:text-rose-700 text-xs font-medium transition cursor-pointer flex items-center gap-1"
+                title="Sign Out to Landing Page"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">Sign Out</span>
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => onNavigateLogin()}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition cursor-pointer"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Portal Login</span>
+            </button>
+          )}
+
         </div>
       </div>
 
       {/* Role / Portal Navigation Bar */}
       <div className="bg-slate-900 text-slate-300 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-1 sm:space-x-2 overflow-x-auto py-1 scrollbar-none" aria-label="Portals">
+          <nav className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto py-1 scrollbar-none" aria-label="Portals">
+            
+            {/* Landing / Home Link */}
+            <button
+              onClick={onNavigateHome}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium whitespace-nowrap transition cursor-pointer ${
+                activePortal === 'landing'
+                  ? 'bg-slate-800 text-emerald-400 font-bold border border-slate-700 shadow-sm'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <Home className="w-3.5 h-3.5" />
+              <span>e-Maap Home</span>
+            </button>
+
+            <span className="text-slate-700">|</span>
+
+            {/* Portal Role Tabs */}
             {portals.map((p) => {
               const Icon = p.icon;
               const isActive = activePortal === p.id;
@@ -116,6 +197,22 @@ export function Navbar({ activePortal, setActivePortal, alertsCount = 2, onSearc
                 </button>
               );
             })}
+
+            {/* Authentication Gateway tab */}
+            <span className="text-slate-700">|</span>
+
+            <button
+              onClick={() => onNavigateLogin()}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium whitespace-nowrap transition cursor-pointer ml-auto ${
+                activePortal === 'login'
+                  ? 'bg-emerald-600 text-white font-bold'
+                  : 'text-amber-400 hover:text-amber-300 hover:bg-slate-800'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Auth Hub</span>
+            </button>
+
           </nav>
         </div>
       </div>

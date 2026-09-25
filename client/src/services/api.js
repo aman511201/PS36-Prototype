@@ -5,9 +5,17 @@
 const API_BASE = '/api';
 
 export const api = {
-  // Health
+  // Health & Auth
   getHealth: async () => {
     const res = await fetch(`${API_BASE}/health`);
+    return res.json();
+  },
+  login: async (credentials) => {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials)
+    });
     return res.json();
   },
 

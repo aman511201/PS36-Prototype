@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
+import { LandingPage } from './components/LandingPage';
+import { LoginPage } from './components/LoginPage';
 import { ExpiryNotificationBanner } from './components/ExpiryNotificationBanner';
 import { MerchantPortal } from './components/MerchantPortal';
 import { LmoInspectorPortal } from './components/LmoInspectorPortal';
@@ -9,6 +11,7 @@ import { ConsumerPortal } from './components/ConsumerPortal';
 import { CertificateModal } from './components/CertificateModal';
 import { QrCodeStickerModal } from './components/QrCodeStickerModal';
 import { api } from './services/api';
+import { CheckCircle2, Info, X } from 'lucide-react';
 import { 
   jurisdictions as defaultJurisdictions,
   officers as defaultOfficers,
@@ -22,7 +25,12 @@ import {
 } from '../../server/data/mockData';
 
 export function App() {
-  const [activePortal, setActivePortal] = useState('merchant'); // 'merchant', 'inspector', 'gatc', 'regulator', 'consumer'
+  // Navigation & Session State
+  // Values: 'landing', 'login', 'merchant', 'inspector', 'gatc', 'regulator', 'consumer'
+  const [activePortal, setActivePortal] = useState('landing');
+  const [loginTargetRole, setLoginTargetRole] = useState('merchant');
+  const [currentUser, setCurrentUser] = useState(null);
+  const [toastMessage, setToastMessage] = useState(null);
   
   // Data State
   const [merchants, setMerchants] = useState(defaultMerchants);
@@ -84,13 +92,45 @@ export function App() {
     fetchData();
   }, []);
 
+  // Authentication Handlers
+  const handleLoginSuccess = (authData) => {
+    setCurrentUser(authData.user);
+    if (authData.role === 'merchant' && authData.entity) {
+      setSelectedMerchant(authData.entity);
+    }
+    if (authData.role === 'inspector' && authData.entity) {
+      setSelectedOfficer(authData.entity);
+    }
+    setActivePortal(authData.targetPortal || 'merchant');
+    
+    setToastMessage({
+      type: 'success',
+      text: `Welcome, ${authData.user.name}! Authenticated to ${authData.role.toUpperCase()} Workspace.`
+    });
+    setTimeout(() => setToastMessage(null), 5000);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setActivePortal('landing');
+    setToastMessage({
+      type: 'info',
+      text: 'Session securely terminated. Returned to public landing page.'
+    });
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const handleOpenLogin = (role = 'merchant') => {
+    setLoginTargetRole(role);
+    setActivePortal('login');
+  };
+
   // Action: Register New Instrument
   const handleRegisterInstrument = async (instData) => {
     try {
       const created = await api.createInstrument(instData);
       setInstruments(prev => [created, ...prev]);
     } catch (e) {
-      // Local fallback
       const newInst = {
         ...instData,
         id: `inst-${Date.now()}`,
@@ -105,7 +145,6 @@ export function App() {
     try {
       const created = await api.createApplication(appData);
       setApplications(prev => [created, ...prev]);
-      // Update instrument status locally
       if (appData.instrumentId) {
         setInstruments(prev => prev.map(i => i.id === appData.instrumentId ? { ...i, status: 'PENDING_INSPECTION' } : i));
       }
@@ -143,7 +182,6 @@ export function App() {
           return [res.instrument, ...prev];
         });
       }
-      // Refresh audit logs
       const updatedLogs = await api.getAuditLogs().catch(() => null);
       if (updatedLogs) setAuditLogs(updatedLogs);
     } catch (e) {
@@ -170,87 +208,145 @@ export function App() {
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans">
       
-      {/* Top Navbar with Portals */}
+      {/* Top Navbar with Portals & Auth Indicator */}
       <Navbar
         activePortal={activePortal}
         setActivePortal={setActivePortal}
         alertsCount={instruments.filter(i => i.status === 'EXPIRING_SOON' || i.status === 'EXPIRED').length}
         onSearchClick={() => setActivePortal('consumer')}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        onNavigateLogin={handleOpenLogin}
+        onNavigateHome={() => setActivePortal('landing')}
       />
 
-      {/* Main Body Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Global Notification Toast */}
+      {toastMessage && (
+        <div className="fixed top-20 right-4 z-50 max-w-md animate-fade-in shadow-xl rounded-xl overflow-hidden border border-slate-200">
+          <div className={`p-4 flex items-center justify-between gap-3 text-xs font-semibold text-white ${
+            toastMessage.type === 'success' ? 'bg-emerald-700' : 'bg-slate-800'
+          }`}>
+            <div className="flex items-center gap-2">
+              {toastMessage.type === 'success' ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-300 flex-shrink-0" />
+              ) : (
+                <Info className="w-4 h-4 text-blue-300 flex-shrink-0" />
+              )}
+              <span>{toastMessage.text}</span>
+            </div>
+            <button
+              onClick={() => setToastMessage(null)}
+              className="text-white/80 hover:text-white cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col">
         
-        {/* Proactive Expiry & Defaulter Alert Banner (visible on Merchant & Regulator views) */}
-        {(activePortal === 'merchant' || activePortal === 'regulator') && (
-          <ExpiryNotificationBanner
+        {/* 0. Landing Page */}
+        {activePortal === 'landing' && (
+          <LandingPage
+            onNavigateLogin={handleOpenLogin}
+            onNavigatePortal={(portal) => setActivePortal(portal)}
+            certificates={certificates}
             instruments={instruments}
-            onRenewClick={(inst) => {
-              setActivePortal('merchant');
-            }}
+            onOpenCertificate={(cert) => setActiveCertificate(cert)}
           />
         )}
 
-        {/* 1. Merchant / Trader Portal */}
-        {activePortal === 'merchant' && (
-          <MerchantPortal
+        {/* 0.5. Login Page for Every User */}
+        {activePortal === 'login' && (
+          <LoginPage
+            initialRole={loginTargetRole}
             merchants={merchants}
-            selectedMerchant={selectedMerchant}
-            setSelectedMerchant={setSelectedMerchant}
-            instruments={instruments}
-            applications={applications}
-            certificates={certificates}
-            onOpenCertificate={(cert) => setActiveCertificate(cert)}
-            onOpenQrSticker={(inst, cert) => setActiveSticker({ instrument: inst, certificate: cert })}
-            onSubmitApplication={handleSubmitApplication}
-            onRegisterInstrument={handleRegisterInstrument}
-          />
-        )}
-
-        {/* 2. Legal Metrology Officer (LMO) Inspector Portal */}
-        {activePortal === 'inspector' && (
-          <LmoInspectorPortal
             officers={officers}
-            selectedOfficer={selectedOfficer}
-            setSelectedOfficer={setSelectedOfficer}
-            applications={applications}
-            certificates={certificates}
-            onInspectApplication={handleInspectApplication}
-            onOpenCertificate={(cert) => setActiveCertificate(cert)}
-          />
-        )}
-
-        {/* 3. Government Approved Test Centre (GATC) Portal */}
-        {activePortal === 'gatc' && (
-          <GatcPortal
             gatcCenters={gatcCenters}
-            instruments={instruments}
-            onOpenCertificate={(cert) => setActiveCertificate(cert)}
+            onLoginSuccess={handleLoginSuccess}
+            onBackToHome={() => setActivePortal('landing')}
           />
         )}
 
-        {/* 4. National & State Regulator Command Center */}
-        {activePortal === 'regulator' && (
-          <RegulatorDashboard
-            regulatorStats={regulatorStats}
-            auditLogs={auditLogs}
-            certificates={certificates}
-            grievances={grievances}
-            onOpenCertificate={(cert) => setActiveCertificate(cert)}
-          />
+        {/* Operational Portals Container (Visible when activePortal is one of the 5 roles) */}
+        {activePortal !== 'landing' && activePortal !== 'login' && (
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            
+            {/* Proactive Expiry & Defaulter Alert Banner (visible on Merchant & Regulator views) */}
+            {(activePortal === 'merchant' || activePortal === 'regulator') && (
+              <ExpiryNotificationBanner
+                instruments={instruments}
+                onRenewClick={(inst) => {
+                  setActivePortal('merchant');
+                }}
+              />
+            )}
+
+            {/* 1. Merchant / Trader Portal */}
+            {activePortal === 'merchant' && (
+              <MerchantPortal
+                merchants={merchants}
+                selectedMerchant={selectedMerchant}
+                setSelectedMerchant={setSelectedMerchant}
+                instruments={instruments}
+                applications={applications}
+                certificates={certificates}
+                onOpenCertificate={(cert) => setActiveCertificate(cert)}
+                onOpenQrSticker={(inst, cert) => setActiveSticker({ instrument: inst, certificate: cert })}
+                onSubmitApplication={handleSubmitApplication}
+                onRegisterInstrument={handleRegisterInstrument}
+              />
+            )}
+
+            {/* 2. Legal Metrology Officer (LMO) Inspector Portal */}
+            {activePortal === 'inspector' && (
+              <LmoInspectorPortal
+                officers={officers}
+                selectedOfficer={selectedOfficer}
+                setSelectedOfficer={setSelectedOfficer}
+                applications={applications}
+                certificates={certificates}
+                onInspectApplication={handleInspectApplication}
+                onOpenCertificate={(cert) => setActiveCertificate(cert)}
+              />
+            )}
+
+            {/* 3. Government Approved Test Centre (GATC) Portal */}
+            {activePortal === 'gatc' && (
+              <GatcPortal
+                gatcCenters={gatcCenters}
+                instruments={instruments}
+                onOpenCertificate={(cert) => setActiveCertificate(cert)}
+              />
+            )}
+
+            {/* 4. National & State Regulator Command Center */}
+            {activePortal === 'regulator' && (
+              <RegulatorDashboard
+                regulatorStats={regulatorStats}
+                auditLogs={auditLogs}
+                certificates={certificates}
+                grievances={grievances}
+                onOpenCertificate={(cert) => setActiveCertificate(cert)}
+              />
+            )}
+
+            {/* 5. Citizen / Consumer Portal */}
+            {activePortal === 'consumer' && (
+              <ConsumerPortal
+                certificates={certificates}
+                instruments={instruments}
+                onSubmitGrievance={handleSubmitGrievance}
+                onOpenCertificate={(cert) => setActiveCertificate(cert)}
+              />
+            )}
+
+          </main>
         )}
 
-        {/* 5. Citizen / Consumer Portal */}
-        {activePortal === 'consumer' && (
-          <ConsumerPortal
-            certificates={certificates}
-            instruments={instruments}
-            onSubmitGrievance={handleSubmitGrievance}
-            onOpenCertificate={(cert) => setActiveCertificate(cert)}
-          />
-        )}
-
-      </main>
+      </div>
 
       {/* Official Government Verification Certificate Modal */}
       {activeCertificate && (
@@ -270,7 +366,7 @@ export function App() {
       )}
 
       {/* Official Government Footer */}
-      <footer className="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 no-print mt-12">
+      <footer className="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 no-print mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-800 pb-4">
             <div>
