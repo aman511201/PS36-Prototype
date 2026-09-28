@@ -1,4 +1,4 @@
-# e-Maap | National Online Verification System for Weighing and Measuring Instruments
+# Maanak | National Online Verification System for Weighing and Measuring Instruments
 
 ### Smart India Hackathon (SIH) • Problem Statement ID: 26036 (PS36)
 **Governed under:** The Legal Metrology Act, 2009 (Act 1 of 2010) & The Legal Metrology (General) Rules, 2011  
@@ -16,7 +16,7 @@ Under the **Legal Metrology Act, 2009** and the **Legal Metrology (General) Rule
 3. **Counterfeiting & Tampering:** Lack of cryptographic certificate verification enables fraudulent seals or expired scales in circulation.
 4. **Consumer Information Asymmetry:** Consumers cannot verify whether a merchant's scale is verified, calibrated, or tampered.
 
-### The Solution: `e-Maap (NLMVS)`
+### The Solution: `Maanak (NLMVS)`
 A unified, cloud-native **National Metrology Online Verification Platform** connecting Merchants, Legal Metrology Officers (LMOs), Government Approved Test Centres (GATCs), Regulators, and Citizens in real-time.
 
 ---

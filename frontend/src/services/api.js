@@ -1,5 +1,5 @@
 /**
- * API Service for Legal Metrology Online Verification System (e-Maap)
+ * API Service for Legal Metrology Online Verification System (Maanak)
  * Secure JWT Authorization & State Management
  */
 

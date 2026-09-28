@@ -1,5 +1,5 @@
 # Statutory Authentication Registry & Pre-Seeded Evaluator Credentials
-**Project:** National Legal Metrology Online Verification System (e-Maap / NLMVS - SIH 26036)  
+**Project:** National Legal Metrology Online Verification System (Maanak / NLMVS - SIH 26036)  
 **Security Standard:** Bcrypt Salted Password Hashing • HMAC-SHA256 Signed JWTs • Server-Side Zero-Trust RBAC
 
 > [!IMPORTANT]

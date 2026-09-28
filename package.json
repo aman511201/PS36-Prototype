@@ -1,7 +1,7 @@
 {
   "name": "ps36-prototpye",
   "version": "1.0.0",
-  "description": "National Online Verification System for Weighing and Measuring Instruments (e-Maap / NLMVS - SIH 26036)",
+  "description": "National Online Verification System for Weighing and Measuring Instruments (Maanak / NLMVS - SIH 26036)",
   "scripts": {
     "dev:server": "python backend/run.py",
     "dev:frontend": "npm --prefix frontend run dev",

@@ -517,7 +517,7 @@ export function LoginPage({
                 Department of Consumer Affairs • Govt of India
               </div>
               <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                <span>e-Maap Access Gateway</span>
+                <span>Maanak Access Gateway</span>
                 <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   Legal Metrology Act 2009
                 </span>

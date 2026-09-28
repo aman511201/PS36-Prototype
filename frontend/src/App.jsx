@@ -576,7 +576,7 @@ export function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-800 pb-4">
             <div>
-              <span className="font-bold text-white text-sm">e-Maap • National Legal Metrology Verification System</span>
+              <span className="font-bold text-white text-sm">Maanak • National Legal Metrology Verification System</span>
               <p className="text-[11px] text-slate-400 mt-0.5">
                 Administered under The Legal Metrology Act, 2009 (Act No. 1 of 2010) & Legal Metrology (General) Rules, 2011
               </p>

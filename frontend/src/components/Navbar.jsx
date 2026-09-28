@@ -36,7 +36,7 @@ export function Navbar({
         <div 
           onClick={currentUser ? () => setActivePortal(currentUser.role) : onNavigateHome}
           className="flex items-center gap-3 cursor-pointer group"
-          title={currentUser ? "Current Workspace" : "Return to e-Maap National Home"}
+          title={currentUser ? "Current Workspace" : "Return to Maanak National Home"}
         >
           <Emblem className="w-11 h-11 flex-shrink-0 group-hover:scale-105 transition-transform" />
           <div>
@@ -50,7 +50,7 @@ export function Navbar({
               </span>
             </div>
             <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 flex items-center gap-1.5">
-              <span className="text-emerald-700">e-Maap</span>
+              <span className="text-emerald-700">Maanak</span>
               <span className="text-slate-400 font-light">|</span>
               <span className="text-slate-800">National Online Verification System</span>
             </h1>
@@ -68,10 +68,10 @@ export function Navbar({
             <button
               onClick={onNavigateHome}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition cursor-pointer"
-              title="Return to e-Maap Home"
+              title="Return to Maanak Home"
             >
               <Home className="w-3.5 h-3.5 text-slate-500" />
-              <span className="hidden sm:inline">e-Maap Home</span>
+              <span className="hidden sm:inline">Maanak Home</span>
             </button>
           )}
 

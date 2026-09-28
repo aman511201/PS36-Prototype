@@ -247,7 +247,7 @@ export function LandingPage({
                   </span>
                 </h1>
                 <p className="text-sm sm:text-base font-semibold text-slate-600">
-                  e-Maap (NLMVS) • Governed under The Legal Metrology Act, 2009 (Act 1 of 2010)
+                  Maanak (NLMVS) • Governed under The Legal Metrology Act, 2009 (Act 1 of 2010)
                 </p>
               </div>
 
@@ -419,7 +419,7 @@ export function LandingPage({
             Role-Based Workspaces for Every Stakeholder
           </h2>
           <p className="text-sm text-slate-600">
-            e-Maap provides distinct, role-tailored authentication and operational toolkits conforming to the statutory requirements of each user group under Indian law.
+            Maanak provides distinct, role-tailored authentication and operational toolkits conforming to the statutory requirements of each user group under Indian law.
           </p>
         </div>
 
@@ -824,7 +824,7 @@ export function LandingPage({
             <span>Process Architecture</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            How e-Maap Modernizes Metrological Verification
+            How Maanak Modernizes Metrological Verification
           </h2>
           <p className="text-xs sm:text-sm text-slate-600">
             From merchant application to physical wire stamping and public citizen verification.

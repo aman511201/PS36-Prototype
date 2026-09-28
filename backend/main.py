@@ -30,7 +30,7 @@ from backend.routes import (
 )
 
 app = FastAPI(
-    title="National Legal Metrology Verification System (e-Maap / NLMVS) API",
+    title="National Legal Metrology Verification System (Maanak / NLMVS) API",
     description="Statutory Verification, Stamping & Compliance Engine under Legal Metrology Act, 2009",
     version="1.0.0"
 )
@@ -67,7 +67,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 async def health_check():
     return {
         "status": "ONLINE",
-        "system": "National Legal Metrology Verification System (e-Maap / NLMVS)",
+        "system": "National Legal Metrology Verification System (Maanak / NLMVS)",
         "act": "Legal Metrology Act, 2009 & General Rules, 2011",
         "serverTime": datetime.now().isoformat(),
         "metrics": {
