@@ -73,7 +73,7 @@ A unified, cloud-native **National Metrology Online Verification Platform** conn
 
 ```
 PS36 prototpye/
-├── client/                     # Frontend Application (React 19 + Vite 8 + Tailwind CSS v4)
+├── frontend/                   # Frontend Application (React 19 + Vite 8 + Tailwind CSS v4)
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── Navbar.jsx               # Header, tricolor government banner, role switcher
@@ -91,14 +91,20 @@ PS36 prototpye/
 │   │   ├── App.jsx                      # Main multi-role application controller
 │   │   └── index.css                    # Tailwind v4 + high-fidelity print styles
 │   └── vite.config.js                   # Vite proxy configuration (port 3000 -> 5000)
-├── server/                     # Backend API Server (Node.js + Express)
+├── backend/                    # Backend API Server (Python FastAPI)
 │   ├── data/
-│   │   └── mockData.js                  # Seed registry data (Maharashtra, Karnataka, Delhi, etc.)
+│   │   └── mockData.json                # Seed registry data (Maharashtra, Karnataka, Delhi, etc.)
+│   ├── middleware/
+│   │   └── auth.py                      # Bearer JWT auth & RBAC route protection
+│   ├── routes/                          # Modular API routers (auth, instruments, certs, etc.)
+│   ├── services/
+│   │   └── auth_service.py              # Bcrypt hashing, JWT issuance & OTP verification
 │   ├── utils/
-│   │   ├── mpeCalculator.js             # Legal Metrology 2011 Table 2 & 3 MPE engine
-│   │   ├── feeCalculator.js             # Schedule XII statutory fee calculation
-│   │   └── cryptoSeal.js                # SHA-256 cryptographic certificate hashing
-│   └── index.js                         # REST API endpoints & in-memory state engine
+│   │   ├── mpe_calculator.py            # Legal Metrology 2011 Table 2 & 3 MPE engine
+│   │   ├── fee_calculator.py            # Schedule XII statutory fee calculation
+│   │   └── crypto_seal.py               # SHA-256 cryptographic certificate hashing
+│   ├── main.py                          # FastAPI application & router mounting
+│   └── run.py                           # Uvicorn entry point (port 5000)
 ├── package.json                         # Root project runner with concurrently
 └── README.md                            # Comprehensive system documentation
 ```
@@ -122,13 +128,17 @@ This starts:
 - **Backend API Server:** `http://localhost:5000`
 - **Frontend Web Application:** `http://localhost:3000` (or `http://localhost:5173`)
 
-### Running Client or Server Individually
+### 🔐 Pre-Seeded Evaluator Login Credentials
+In compliance with strict security standards, **no passwords, 2FA tokens, or OTP secrets are stored in the frontend client bundle**. All accounts and credentials are verified server-side. For evaluator test credentials across all 5 roles (Merchant, LMO Inspector, GATC Lab, Apex Regulator, and Citizen OTP), please refer to:
+👉 **[CREDENTIALS.md](CREDENTIALS.md)**
+
+### Running Frontend or Server Individually
 ```bash
 # Run backend server only:
 npm run dev:server
 
-# Run frontend client only:
-npm run dev:client
+# Run frontend application only:
+npm run dev:frontend
 ```
 
 ---

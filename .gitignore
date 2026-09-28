@@ -10,6 +10,20 @@ dist/
 build/
 .output/
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.pytest_cache/
+
+# Vercel
+.vercel
+
 # OS Files
 .DS_Store
 Thumbs.db
